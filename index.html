@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            background-image: url(https://www.newgenapps.com/hubfs/Imported_Blog_Media/Website-Design-Background-Feb-09-2022-03-13-55-73-AM.png);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+       
+        }
+        .hidden {
+            color: white;
+            display: none;
+        }
+        #loginpage{
+            align-items: center;
+        }
+        .grid {
+            color: black;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: darkgray;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: grey;
+        }
+        .section {
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .university-list {
+            color: black;
+            list-style-type: none;
+            padding: 0;
+        }
+        .university-item {
+            background-color: #f8f9fa;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+        }
+        .university-item:hover {
+            background-color: #e9ecef;
+        }
+        .university-stats {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            z-index: 1;
+        }
+        .university-item:hover .university-stats {
+            display: block;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .button-group button {
+            width: 48%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loginPage" class="card">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Log In</button>
+            </form>
+        </div>
+
+        <div id="dashboard" class="hidden">
+            <div class="section">
+                <h2>Team Overview</h2>
+                <div class="grid" id="teamCards"></div>
+            </div>
+
+            <div class="section">
+                <h2>Departments</h2>
+                <div class="grid" id="departmentCards"></div>
+            </div>
+
+            <div class="section">
+                <h2>Campus Recruitment</h2>
+                <div id="campusRecruitment">
+                    <h3>Partner Universities</h3>
+                    <ul class="university-list" id="universityList"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="departmentDetails" class="hidden">
+            <h2 id="departmentName"></h2>
+            <p id="jobDescription"></p>
+            <div class="button-group">
+                <button onclick="applyForJob()">Apply</button>
+                <button onclick="viewApplicants()">View Applicants</button>
+            </div>
+            <button onclick="goBackToDashboard()">Back to Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        const loginPage = document.getElementById('loginPage');
+        const dashboard = document.getElementById('dashboard');
+        const departmentDetails = document.getElementById('departmentDetails');
+        const loginForm = document.getElementById('loginForm');
+        const teamCards = document.getElementById('teamCards');
+        const departmentCards = document.getElementById('departmentCards');
+        const universityList = document.getElementById('universityList');
+
+        const teams = [
+            { name: 'Development', leader: 'Akash', members: ['Aditya', 'Akshat'] },
+            { name: 'Design', leader: 'Ishaan', members: ['Karan', 'Anshuman'] },
+            { name: 'Marketing', leader: 'Anubhav', members: ['Arpit', 'Amit'] }
+        ];
+
+        const departments = [
+            { name: 'Engineering', vacancies: 3, description: 'Join our innovative engineering team to build cutting-edge solutions. We are looking for talented software engineers with experience in full-stack development, machine learning, and cloud technologies. Youll work on challenging projects and have the opportunity to grow your skills in a collaborative environment.' },
+            { name: 'Marketing', vacancies: 2, description: 'Help us spread the word about our amazing products and services. Were seeking creative marketing professionals with a strong understanding of digital marketing strategies, content creation, and data analytics. Youll play a key role in developing and executing marketing campaigns across various channels.' },
+            { name: 'Human Resources', vacancies: 1, description: 'Support our growing team and help maintain a positive work culture. Were looking for an HR specialist with experience in talent acquisition, employee relations, and performance management. Youll be responsible for implementing HR policies and programs that align with our company values and goals.' },
+            { name: 'Finance', vacancies: 2, description: 'Manage our financial operations and drive business growth. We need skilled finance professionals with experience in financial planning, analysis, and reporting. Youll work closely with other departments to provide insights that inform strategic decision-making and ensure the companys financial health.' }
+        ];
+
+        const universities = [
+            { name: 'NIT Delhi', studentsTraining: 15, studentsHired: 8 },
+            { name: 'Amity University', studentsTraining: 12, studentsHired: 6 },
+            { name: 'Chandigarh University', studentsTraining: 10, studentsHired: 5 },
+            { name: 'Delhi Institute of Technology', studentsTraining: 8, studentsHired: 4 },
+            { name: 'Chitkara University', studentsTraining: 7, studentsHired: 3 },
+            { name: 'Thapad University', studentsTraining: 9, studentsHired: 4 },
+            { name: 'IIT Roorkee', studentsTraining: 6, studentsHired: 2 },
+            { name: 'Chandigarh group of colleges', studentsTraining: 5, studentsHired: 2 },
+            { name: 'CCIET', studentsTraining: 7, studentsHired: 3 },
+            { name: 'Vellore University' , studentsTraining: 8, studentsHired: 4 }
+        ];
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            loginPage.classList.add('hidden');
+            dashboard.classList.remove('hidden');
+            renderDashboard();
+        
+        });
+
+        function renderDashboard() {
+            renderTeams();
+            renderDepartments();
+            renderUniversities();
+        }
+
+        function renderTeams() {
+            teamCards.innerHTML = teams.map(team => `
+                <div class="card">
+                    <h3>${team.name}</h3>
+                    <p><strong>Team Leader:</strong> ${team.leader}</p>
+                    <p><strong>Team Members:</strong></p>
+                    <ul>
+                        ${team.members.map(member => `<li>${member}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
+        function renderDepartments() {
+            departmentCards.innerHTML = departments.map(dept => `
+                <div class="card">
+                    <h3>${dept.name}</h3>
+                    <p>Vacancies: ${dept.vacancies}</p>
+                    <button onclick="showDepartmentDetails('${dept.name}')">View Details</button>
+                </div>
+            `).join('');
+        }
+
+        function renderUniversities() {
+            universityList.innerHTML = universities.map(uni => `
+                <li class="university-item">
+                    ${uni.name}
+                    <div class="university-stats">
+                        <p>Students in Training: ${uni.studentsTraining}</p>
+                        <p>Students Hired: ${uni.studentsHired}</p>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        function showDepartmentDetails(deptName) {
+            const dept = departments.find(d => d.name === deptName);
+            document.getElementById('departmentName').textContent = dept.name;
+            document.getElementById('jobDescription').textContent = dept.description;
+            dashboard.classList.add('hidden');
+            departmentDetails.classList.remove('hidden');
+        }
+
+        function goBackToDashboard() {
+            departmentDetails.classList.add('hidden');
+            dashboard.classList.remove('hidden');
+        }
+
+        function applyForJob() {
+            alert("Thank you for your interest! Your application has been submitted.");
+        }
+
+        function viewApplicants() {
+            alert("This feature is not yet implemented. Check back later for updates!");
+        }
+    </script>
+</body>
+</html>
